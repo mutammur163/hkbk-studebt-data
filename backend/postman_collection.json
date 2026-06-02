@@ -1,0 +1,266 @@
+{
+  "info": {
+    "name": "HKBKCE Admission Intelligence API",
+    "description": "Full API collection for the HKBKCE Admission Intelligence & Student Data Management Platform",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:4000/api" },
+    { "key": "token", "value": "" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/register",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"test@hkbkce.edu.in\",\n  \"password\": \"test123\",\n  \"role\": \"viewer\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login (Admin)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@hkbkce.edu.in\",\n  \"password\": \"admin123\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": ["var jsonData = pm.response.json();", "pm.collectionVariables.set('token', jsonData.data.token);"]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/auth/profile"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Students",
+      "item": [
+        {
+          "name": "List Students",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/students?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["students"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "department", "value": "CSE", "disabled": true },
+                { "key": "admissionType", "value": "KCET", "disabled": true },
+                { "key": "category", "value": "GM", "disabled": true },
+                { "key": "gender", "value": "Male", "disabled": true },
+                { "key": "rankMin", "value": "1000", "disabled": true },
+                { "key": "rankMax", "value": "50000", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Student by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/students/:id"
+          }
+        },
+        {
+          "name": "Create Student",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/students",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usn\": \"1HK24CS099\",\n  \"name\": \"Test Student\",\n  \"gender\": \"Male\",\n  \"department\": \"CSE\",\n  \"year\": 1,\n  \"section\": \"A\",\n  \"mobile\": \"9876543210\",\n  \"email\": \"test.student@gmail.com\",\n  \"admission\": {\n    \"admissionType\": \"KCET\",\n    \"cetNo\": \"CET202499999\",\n    \"rank\": 15000,\n    \"claimedCategory\": \"GM\",\n    \"allottedCategory\": \"GM\",\n    \"seatType\": \"Government\",\n    \"admissionRound\": \"Round 1\"\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Student",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/students/:id",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Name\",\n  \"department\": \"ECE\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Student",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/students/:id"
+          }
+        },
+        {
+          "name": "Bulk Upload (CSV)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/students/bulk-upload",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "file", "type": "file", "src": "" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Search",
+      "item": [
+        {
+          "name": "Search Students",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/search?q=aarav",
+              "host": ["{{baseUrl}}"],
+              "path": ["search"],
+              "query": [{ "key": "q", "value": "aarav" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Summary",
+          "request": { "method": "GET", "url": "{{baseUrl}}/dashboard/summary" }
+        },
+        {
+          "name": "Branch Stats",
+          "request": { "method": "GET", "url": "{{baseUrl}}/dashboard/branch-stats" }
+        },
+        {
+          "name": "Category Stats",
+          "request": { "method": "GET", "url": "{{baseUrl}}/dashboard/category-stats" }
+        }
+      ]
+    },
+    {
+      "name": "Cutoff",
+      "item": [
+        {
+          "name": "Get Cutoff by Department",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/cutoff?department=CSE",
+              "host": ["{{baseUrl}}"],
+              "path": ["cutoff"],
+              "query": [{ "key": "department", "value": "CSE" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Documents",
+      "item": [
+        {
+          "name": "Upload Document",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/documents/upload",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "file", "type": "file", "src": "" },
+                { "key": "title", "value": "KCET Round 1 Seat Allotment", "type": "text" },
+                { "key": "type", "value": "seat_allotment", "type": "text" },
+                { "key": "academicYear", "value": "2024-25", "type": "text" },
+                { "key": "department", "value": "CSE", "type": "text" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Documents",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/documents?type=cutoff&year=2024-25",
+              "host": ["{{baseUrl}}"],
+              "path": ["documents"],
+              "query": [
+                { "key": "type", "value": "cutoff", "disabled": true },
+                { "key": "year", "value": "2024-25", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Download Document",
+          "request": { "method": "GET", "url": "{{baseUrl}}/documents/:id" }
+        }
+      ]
+    },
+    {
+      "name": "Reports",
+      "item": [
+        {
+          "name": "Generate Report (JSON)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/reports/generate?format=json&branch=CSE",
+              "host": ["{{baseUrl}}"],
+              "path": ["reports", "generate"],
+              "query": [
+                { "key": "format", "value": "json" },
+                { "key": "branch", "value": "CSE", "disabled": true },
+                { "key": "category", "value": "GM", "disabled": true },
+                { "key": "admissionType", "value": "KCET", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Generate Report (CSV)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/reports/generate?format=csv"
+          }
+        },
+        {
+          "name": "Generate Report (PDF)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/reports/generate?format=pdf"
+          }
+        }
+      ]
+    }
+  ]
+}

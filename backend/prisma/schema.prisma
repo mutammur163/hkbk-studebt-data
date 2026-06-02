@@ -1,0 +1,121 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name         String
+  email        String      @unique
+  passwordHash String
+  role         user_role
+  createdAt    DateTime    @default(now()) @db.Timestamp(6)
+  documents    Document[]  @relation("Uploader")
+  auditLogs    AuditLog[]
+
+  @@map("users")
+}
+
+model Category {
+  code        String @id
+  description String
+
+  @@map("categories")
+}
+
+model Student {
+  id         String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  sl_no      Int?        @map("sl_no")
+  usn        String      @unique
+  name       String
+  gender     String?
+  category   String?
+  quota      String?
+  branch     String?
+  department String?
+  year       Int?
+  section    String?
+  mobile     String?
+  email      String?
+  createdAt  DateTime?   @default(now()) @db.Timestamp(6) @map("created_at")
+  updatedAt  DateTime?   @default(now()) @db.Timestamp(6) @map("updated_at")
+  admission  Admission?
+  auditLogs  AuditLog[]
+
+  @@map("students")
+}
+
+model Admission {
+  id               String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  studentId        String         @unique
+  admissionType    admission_type
+  cetNo            String?
+  rank             Int?
+  claimedCategory  String?
+  allottedCategory String?
+  seatType         String?
+  admissionRound   String?
+  confirmationDate DateTime?
+  student          Student        @relation(fields: [studentId], references: [id])
+
+  @@map("admissions")
+}
+
+model AuditLog {
+  id         String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  userId     String?
+  studentId  String?
+  action     audit_action
+  fieldName  String
+  oldValue   String?
+  newValue   String?
+  timestamp  DateTime    @default(now()) @db.Timestamp(6)
+  user       User?       @relation(fields: [userId], references: [id])
+  student    Student?    @relation(fields: [studentId], references: [id])
+
+  @@map("audit_logs")
+}
+
+model Document {
+  id           String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  title        String
+  type         document_type
+  department   String?
+  academicYear String?
+  fileUrl      String
+  uploadedBy   String?
+  createdAt    DateTime    @default(now()) @db.Timestamp(6)
+  uploader     User?       @relation("Uploader", fields: [uploadedBy], references: [id])
+
+  @@map("documents")
+}
+
+enum admission_type {
+  KCET
+  Management
+  KRLMPCA
+  Diploma
+}
+
+enum audit_action {
+  create
+  update
+  delete
+}
+
+enum document_type {
+  seat_allotment
+  fee_structure
+  cutoff
+}
+
+enum user_role {
+  admin
+  admission_staff
+  faculty
+  viewer
+}

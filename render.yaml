@@ -1,0 +1,39 @@
+services:
+  # ─── Backend Web Service ──────────────────────────────────────────────────────
+  - type: web
+    name: hkbkce-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false          # Set this manually in Render dashboard
+      - key: JWT_SECRET
+        generateValue: true  # Render auto-generates a secure random value
+      - key: CORS_ORIGIN
+        value: https://hkbk-studebt-data-u4b6.onrender.com
+      - key: UPLOAD_DIR
+        value: ./uploads
+      - key: MAX_FILE_SIZE
+        value: "10485760"
+
+  # ─── Frontend Static Site ─────────────────────────────────────────────────────
+  - type: static
+    name: hkbkce-frontend
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    publishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://hkbk-studebt-data-backend.onrender.com/api
+      - key: VITE_SUPABASE_URL
+        sync: false          # Your Supabase Project URL
+      - key: VITE_SUPABASE_ANON_KEY
+        sync: false          # Your Supabase Anon Key
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html   # SPA fallback — handles React Router routes
